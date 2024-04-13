@@ -7,7 +7,7 @@
 - In your terminal - Terminal for Mac and PowerShell for Windows - write
 `git clone https://github.com/AFLplusplus/AFLplusplus` to clone AFLpluslplus onto your computer.
 
-# Phase 2: The First Fuzz
+# Phase 1: The First Fuzz
 
 Estimated Time: 45 Minutes
 
