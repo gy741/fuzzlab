@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/simple_crash.dir/simple_crash.cpp.o -o simple_crash
