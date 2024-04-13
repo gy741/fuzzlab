@@ -15,17 +15,16 @@ Estimated Time: 45 Minutes
 
 This is completed in the target container Docker CLI:
 
-1. After starting the docker container, you should be within the `/AFLplusplus` directory. Navigate to the folder of the code you want to fuzz. You will need to go up a directory from `/AFLplusplus` (`cd ..`), and then `cd` into [name of the directory you are adding to the container] from step 4 of "Creating a Container to Fuzz Code".
-2. Create a build directory (standard practice to name it build)
+1. Create a build directory (standard practice to name it build)
     - `mkdir build`
-3. Change directory into build
+2. Change directory into build
     - `cd build`
-4. Add AFL++ tooling to the compiler for your executable:
+3. Add AFL++ tooling to the compiler for your executable:
     - `CC=/AFLplusplus/afl-clang-fast CXX=/AFLplusplus/afl-clang-fast++ cmake ..`
     - Informational Note: `afl-clang-fast/++` is just one example of compilers you can use with AFL++ - different compilers have different advantages. You can use any of the compilers within the `/AFLplusplus` directory, and the `CXX` variable name is always the same as the `CC` variable, with `++` appended to the end. You can read more about the different compilers and their advantages within the [AFL++ docs](https://github.com/AFLplusplus/AFLplusplus/tree/stable/instrumentation).
-5. Make the files in build
+4. Make the files in build
     - `make`
-6. If you do not already have a seed directory, follow this process to create and populate one using the `dd` command.  If you do have such a directory, skip to step 7.
+5. If you do not already have a seed directory, follow this process to create and populate one using the `dd` command.  If you do have such a directory, skip to step 7.
     - `cd ..`  
     - `mkdir seeds`  
     - `for i in {0..4}; do dd if=/dev/urandom of=seed_$i bs=64 count=10; done`  
@@ -34,7 +33,7 @@ This is completed in the target container Docker CLI:
 
 You can read more about the `dd` command at this [Stack Exchange post](https://unix.stackexchange.com/questions/33629/how-can-i-populate-a-file-with-random-data).
 
-7. Once you have a seed directory, enter the following command:
+6. Once you have a seed directory, enter the following command:
     - `/AFLplusplus/afl-fuzz -i [full path to your seeds directory] -o out -m none -d -- [full path to the executable]`
 
 Congratulations, you are now running AFL++ on your target code! There should be a UI in terminal which shows you various statistics about the fuzzing process - look for the number of crashes detected.
