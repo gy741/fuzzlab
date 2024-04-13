@@ -20,7 +20,7 @@ This is completed in the target container Docker CLI:
 2. Change directory into build
     - `cd build`
 3. Add AFL++ tooling to the compiler for your executable:
-    - `CC=/AFLplusplus/afl-clang-fast CXX=/AFLplusplus/afl-clang-fast++ cmake ..`
+    - `CC=afl-clang-fast CXX=afl-clang-fast++ cmake ..`
     - Informational Note: `afl-clang-fast/++` is just one example of compilers you can use with AFL++ - different compilers have different advantages. You can use any of the compilers within the `/AFLplusplus` directory, and the `CXX` variable name is always the same as the `CC` variable, with `++` appended to the end. You can read more about the different compilers and their advantages within the [AFL++ docs](https://github.com/AFLplusplus/AFLplusplus/tree/stable/instrumentation).
 4. Make the files in build
     - `make`
