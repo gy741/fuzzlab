@@ -1,93 +1,55 @@
-# 개소리
+# Table of Contents
 
-## 빌드 방법
-```bash
-$ git clone "https://github.com/yejun614/DogSoundLang.git"
+## How to Clone AFLplusplus
 
-$ cd DogSoundLang
+ - The next step is to go to the AFLplusplus [Github Repo](https://github.com/AFLplusplus/AFLplusplus) and hit the green
+ "Code" button, and copy the HTTPS link to clone the repository.
+- In your terminal - Terminal for Mac and PowerShell for Windows - write
+`git clone https://github.com/AFLplusplus/AFLplusplus` to clone AFLpluslplus onto your computer.
 
-$ mkdir build
+# Phase 1: The First Fuzz
 
-$ cd build
+Estimated Time: 45 Minutes
 
-$ cmake ..
+## How to Run AFL++ on Exercise 1
 
-$ make
+This is completed in the target container Docker CLI:
 
-$ ./DogLang
-```
+1. Create a build directory (standard practice to name it build)
+    - `mkdir build`
+2. Change directory into build
+    - `cd build`
+3. Add AFL++ tooling to the compiler for your executable:
+    - `CC=afl-clang-fast CXX=afl-clang-fast++ cmake ..`
+    - Informational Note: `afl-clang-fast/++` is just one example of compilers you can use with AFL++ - different compilers have different advantages. You can use any of the compilers within the `/AFLplusplus` directory, and the `CXX` variable name is always the same as the `CC` variable, with `++` appended to the end. You can read more about the different compilers and their advantages within the [AFL++ docs](https://github.com/AFLplusplus/AFLplusplus/tree/stable/instrumentation).
+4. Make the files in build
+    - `make`
+5. If you do not already have a seed directory, follow this process to create and populate one using the `dd` command.  If you do have such a directory, skip to step 7.
+    - `cd ..`  
+    - `mkdir seeds`  
+    - `for i in {0..4}; do dd if=/dev/urandom of=seed_$i bs=64 count=10; done`  
+    - `cd ..`  
+    - `cd build`
 
-## 개소리 문법
+You can read more about the `dd` command at this [Stack Exchange post](https://unix.stackexchange.com/questions/33629/how-can-i-populate-a-file-with-random-data).
 
-### 멍 (!, ?): -> + 정수를 저장
-    ! => ++
-    ? => 가산
+6. Once you have a seed directory, enter the following command:
+    - `/AFLplusplus/afl-fuzz -i [full path to your seeds directory] -o out -m none -d -- [full path to the executable]`
 
-    멍! -> 1번째 변수에 1을 저장
-    멍멍!!-> 2번째 변수에 2를 저장
-    멍멍멍!!!!! -> 3번째 변수에 5를 저장
-    손! 멍멍!? -> 1번 변수에 있는 값을 2번 변수에 가산 + 1
+Congratulations, you are now running AFL++ on your target code! There should be a UI in terminal which shows you various statistics about the fuzzing process - look for the number of crashes detected.
 
-### 망 (!, ?): - 정수를 저장
-    ! => --
-    ? => 감산
+## Analyzing the Crashes
 
-    망! -> 1번째 변수에 -1을 저장
-    손!! 망망!? -> 2번 변수에 있는 값을 1번 변수에 감산 - 1
+- Once there is at least 1 crash shown in the UI of AFL++, hit `Ctrl + C` to exit AFL++. You can find the inputs that caused the program to crash by traversing to the `out/default/crashes` directory.
+- You can use a bugger, such as `gdb` or `llvm`, to figure out what part of the input actually caused the program to crash. There are also other directories in `out/default` that show you some information gathered during the fuzzing process - feel free to explore them.
 
-### 손 (!): 변수 가져오기
-    ! => index
+## Conclusion
 
-    손! -> 1번째 변수를 가져오기
-    손!! -> 2번째 변수를 가져오기
+Through this module, you have learned the basics of fuzzing. We walked through a basic introduction to fuzzing, and important software to download. We also discussed using AFL++ and Docker, and some example exercises to fuzz. One of the most important parts of this module is understanding the errors that you ran into while going through our tutorial. Although many potential errors are accounted for in our explanations, knowing where these exercises come from is half the battle of understanding how to fuzz because it will provide a foundation for fuzzing much more complex programs, such as flight controller software. If you want to spend more time learning about this, go back through the errors you ran into and things that were missed while walking through the practice exercises.
 
-### 작게짖어: 정수로 출력
-    손! 작게짖어 -> 1번째 변수 값 숫자로 출력
-### 크게짖어: 문자열로 출력
-    손!! 크게짖어 -> 2번째 변수 값 문자열로 출력
+Fuzzing is used consistently in industries like aviation, finance, healthcare, energy, automotive, and more, as security regulations increase across all industries. If you want to learn more about the practical applications of fuzzing in industry, check out these articles:
 
-### 산책가자:
-    code의 스코프
-
-### 엄마가좋아아빠가좋아 (엄마?, 아빠?, 둘다?): 비교 연산자
-    엄마? => >
-    아빠? => <
-    둘다? => ==
-
-### ex)
-    손! 엄마가좋아아빠가좋아 엄마? 손!!!! -> 1번째 변수가 4번째 변수보다 작을 실행
-        손! 멍! -> 1번째 변수 = 1번째 변수 + 1;
-    산책가자 -> END
-
-### 돌아 (비교연산자): 반복 연산자
-
-    돌아 손!! 엄마가좋아아빠가좋아 아빠? 손!!! -> V[2] < V[3]
-        손!! 멍멍!? -> V[2] = V[2] + 1
-    산책가자 -> END
-
-
-### 개집 (함수명, 개껌): 함수 선언
-    개집 함수명(개껌, 개껌...) -> 개껌은 파리미터의 개수
-        코드
-    산책가자 -> END
-
-    개집 왕(개껌)
-        손개껌! 작게짖어 -> 첫번째 파라미터를 가져와 숫자로 출력
-    산책가자 -> END
-
-### 우쭈쭈 : 함수 호출
-    우쭈쭈 왕(파리미터...) -> 왕 함수 호출
-
-### ex) 함수 사용 - 첫번째 변수 + 첫번째 변수를 더하고 출력
-    멍!
-    개집 왕(개껌, 개껌)
-        손개껌! 개껌!!?
-        손개껌! 작게짖어
-    산책가자
-
-    우쭈쭈 왕(!, 멍)
-    우쭈쭈 왕(!, 멍)
-
-    망!
-    망망!!!
-    손!! 망망!!?
+- [Making fuzzing smarter](https://cybersecurity.springeropen.com/articles/10.1186/s42400-018-0002-y): This paper discusses fuzzing and how it can be made more efficient, smarter, and more state-of-the-art.
+- [Ethereum Network Vulnerability](https://autobahn.security/post/fuzzing-blockchain-2): how advanced fuzz testing discovered a serious DOS vulnerability in the Ethereum network.
+- [Different types of fuzzing](https://patricegodefroid.github.io/public_psfiles/Fuzzing-101-CACM2020.pdf): This article discussed a few different types of fuzzing - blackbox, whitebox, and grammar-based - and the effectiveness of each.
+- In general...[a list of bugs you can find by fuzzing](https://www.code-intelligence.com/blog/what-bugs-can-you-find-with-fuzzing)
